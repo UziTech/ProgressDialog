@@ -11,7 +11,6 @@ using System.Windows.Forms;
 public class ProgressDialog
 {
     private BackgroundWorker worker = new BackgroundWorker();
-    public bool IsCanceled = false;
 
     public event CancelEventHandler Canceled;
     public event RunWorkerCompletedEventHandler Completed;
@@ -34,7 +33,6 @@ public class ProgressDialog
     void dialog_Canceled(object sender, CancelEventArgs e)
     {
         worker.CancelAsync();
-        IsCanceled = true;
         if (Canceled != null)
         {
             Canceled(this, e);
@@ -46,6 +44,7 @@ public class ProgressDialog
         if (DoWork != null)
         {
             DoWork(this, e);
+            e.Cancel = Cancelled;
         }
         else
         {
@@ -69,7 +68,7 @@ public class ProgressDialog
     {
         if (Completed != null)
         {
-            Completed(this, new RunWorkerCompletedEventArgs(e.Result, e.Error, IsCanceled));
+            Completed(this, e);
         }
         dialog.Close();
     }
@@ -103,6 +102,11 @@ public class ProgressDialog
     {
         get { return dialog.progressBar.Value; }
         set { dialog.progressBar.Value = value; }
+    }
+
+    public bool Cancelled
+    {
+        get { return worker.CancellationPending; }
     }
 
     public ProgressBarStyle Style
