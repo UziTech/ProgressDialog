@@ -69,7 +69,7 @@ public class ProgressDialog
     {
         if (Completed != null)
         {
-            Completed(this, e);
+            Completed(this, new RunWorkerCompletedEventArgs(e.Result, e.Error, IsCanceled));
         }
         dialog.Close();
     }
