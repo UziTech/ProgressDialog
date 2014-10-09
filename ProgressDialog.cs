@@ -1,3 +1,7 @@
+/*
+ * Author: Tony Brix, http://tonybrix.info
+ * License: MIT
+ */ 
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -79,6 +83,11 @@ public class ProgressDialog
         {
             ProgressChanged(this, e);
         }
+    }
+
+    public void ReportProgress(int percentProgress, object userState)
+    {
+        worker.ReportProgress(percentProgress, userState);
     }
 
     public void ReportProgress(int percentProgress)
