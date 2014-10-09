@@ -5,7 +5,7 @@ C# Multi-threaded background worker with dialog to show progress
 
 Usage
 =====
-
+```
 ProgressDialog pDialog = new ProgressDialog();
 pDialog.Title = "Progress Title";
 pDialog.DoWork += delegate(object dialog, DoWorkEventArgs dwe)
@@ -24,3 +24,4 @@ pDialog.Completed += delegate(object dialog, RunWorkerCompletedEventArgs rwce) {
     MessageBox.Show("Completed");
 };
 pDialog.Run(100);
+```
