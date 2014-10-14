@@ -3,14 +3,11 @@
  * License: MIT
  */ 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.WindowsAPICodePack.Taskbar;
 
 public class ProgressDialog
 {
@@ -21,7 +18,7 @@ public class ProgressDialog
     public event ProgressChangedEventHandler ProgressChanged;
     public event DoWorkEventHandler DoWork;
 
-    private loadingDialog dialog = new loadingDialog();
+    private dialogForm dialog = new dialogForm();
 
     public ProgressDialog()
     {
@@ -58,12 +55,20 @@ public class ProgressDialog
 
     public void Run()
     {
+        if (TaskbarManager.IsPlatformSupported)
+        {
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Normal);
+        }
         worker.RunWorkerAsync();
         dialog.ShowDialog();
     }
 
     public void Run(object argument)
     {
+        if (TaskbarManager.IsPlatformSupported)
+        {
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Normal);
+        }
         worker.RunWorkerAsync(argument);
         dialog.ShowDialog();
     }
@@ -73,6 +78,10 @@ public class ProgressDialog
         if (Completed != null)
         {
             Completed(this, e);
+        }
+        if (TaskbarManager.IsPlatformSupported)
+        {
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
         }
         dialog.Close();
     }
@@ -110,7 +119,13 @@ public class ProgressDialog
     public int Progress
     {
         get { return dialog.progressBar.Value; }
-        set { dialog.progressBar.Value = value; }
+        set {
+            if (TaskbarManager.IsPlatformSupported)
+            {
+                TaskbarManager.Instance.SetProgressValue(value, 100);
+            }
+            dialog.progressBar.Value = value;
+        }
     }
 
     public bool Cancelled
@@ -124,60 +139,58 @@ public class ProgressDialog
         set { dialog.progressBar.Style = value; }
     }
 
-    private class loadingDialog : Form
+    private class dialogForm : Form
     {
-        public System.Windows.Forms.Label message;
-        public System.Windows.Forms.ProgressBar progressBar;
-        private System.Windows.Forms.Button bCancel;
+        public Label message;
+        public ProgressBar progressBar;
+        private Button bCancel;
         public event CancelEventHandler Canceled;
 
-        public loadingDialog()
+        public dialogForm()
         {
-            this.message = new System.Windows.Forms.Label();
-            this.progressBar = new System.Windows.Forms.ProgressBar();
-            this.bCancel = new System.Windows.Forms.Button();
+            this.message = new Label();
+            this.progressBar = new ProgressBar();
+            this.bCancel = new Button();
             this.SuspendLayout();
             // 
             // message
             // 
             this.message.AutoSize = true;
-            this.message.Location = new System.Drawing.Point(12, 9);
+            this.message.Location = new Point(12, 9);
             this.message.Name = "message";
-            this.message.Size = new System.Drawing.Size(54, 13);
+            this.message.Size = new Size(54, 13);
             this.message.TabIndex = 0;
             this.message.Text = "Loading...";
             // 
             // progressBar
             // 
-            this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar.Location = new System.Drawing.Point(12, 25);
+            this.progressBar.Anchor = ((AnchorStyles)((((AnchorStyles.Top | AnchorStyles.Bottom) | AnchorStyles.Left) | AnchorStyles.Right)));
+            this.progressBar.Location = new Point(12, 25);
             this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(421, 23);
+            this.progressBar.Size = new Size(421, 23);
             this.progressBar.TabIndex = 1;
             // 
             // bCancel
             // 
-            this.bCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.bCancel.Location = new System.Drawing.Point(358, 54);
+            this.bCancel.Anchor = ((AnchorStyles)((AnchorStyles.Bottom | AnchorStyles.Right)));
+            this.bCancel.Location = new Point(358, 54);
             this.bCancel.Name = "bCancel";
-            this.bCancel.Size = new System.Drawing.Size(75, 23);
+            this.bCancel.Size = new Size(75, 23);
             this.bCancel.TabIndex = 2;
             this.bCancel.Text = "Cancel";
             this.bCancel.UseVisualStyleBackColor = true;
-            this.bCancel.Click += new System.EventHandler(this.bCancel_Click);
+            this.bCancel.Click += new EventHandler(this.bCancel_Click);
             // 
             // loadingDialog
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(445, 89);
+            this.AutoScaleDimensions = new SizeF(6F, 13F);
+            this.AutoScaleMode = AutoScaleMode.Font;
+            this.ClientSize = new Size(445, 89);
             this.ControlBox = false;
             this.Controls.Add(this.bCancel);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.message);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
+            this.FormBorderStyle = FormBorderStyle.FixedToolWindow;
             this.Name = "loadingDialog";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
@@ -189,7 +202,11 @@ public class ProgressDialog
 
         private void bCancel_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("Are you sure you want to cancel?", "Cancel", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == System.Windows.Forms.DialogResult.Yes)
+            if (TaskbarManager.IsPlatformSupported)
+            {
+                TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Error);
+            }
+            if (MessageBox.Show("Are you sure you want to cancel?", "Cancel", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
             {
                 bCancel.Enabled = false;
                 this.Text = "Canceling...";
