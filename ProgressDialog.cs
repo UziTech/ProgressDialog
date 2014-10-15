@@ -169,6 +169,11 @@ public class ProgressDialog : IDisposable
         set { dialog.progressBar.Style = value; }
     }
 
+    public IWin32Window Window
+    {
+        get { return dialog; }
+    }
+
     private class dialogForm : Form
     {
         public Label message;
