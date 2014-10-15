@@ -9,17 +9,47 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.WindowsAPICodePack.Taskbar;
 
-public class ProgressDialog
+public class ProgressDialog : IDisposable
 {
     private BackgroundWorker worker = new BackgroundWorker();
+    private dialogForm dialog = new dialogForm();
 
     public event CancelEventHandler Canceled;
     public event RunWorkerCompletedEventHandler Completed;
     public event ProgressChangedEventHandler ProgressChanged;
     public event DoWorkEventHandler DoWork;
 
-    private dialogForm dialog = new dialogForm();
+    private bool disposed = false;
 
+    public void Dispose()
+    {
+        Dispose(true);
+        // This object will be cleaned up by the Dispose method. 
+        // Therefore, you should call GC.SupressFinalize to 
+        // take this object off the finalization queue 
+        // and prevent finalization code for this object 
+        // from executing a second time.
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        // Check to see if Dispose has already been called. 
+        if (!this.disposed)
+        {
+            // If disposing equals true, dispose all managed 
+            // and unmanaged resources. 
+            if (disposing)
+            {
+                // Dispose managed resources.
+                worker.Dispose();
+                dialog.Dispose();
+            }
+            // Note disposing has been done.
+            disposed = true;
+
+        }
+    }
     public ProgressDialog()
     {
         worker = new BackgroundWorker();
@@ -45,7 +75,7 @@ public class ProgressDialog
         if (DoWork != null)
         {
             DoWork(this, e);
-            e.Cancel = Cancelled;
+            e.Cancel = Cancelled || e.Cancel;
         }
         else
         {
@@ -164,7 +194,7 @@ public class ProgressDialog
             // 
             // progressBar
             // 
-            this.progressBar.Anchor = ((AnchorStyles)((((AnchorStyles.Top | AnchorStyles.Bottom) | AnchorStyles.Left) | AnchorStyles.Right)));
+            this.progressBar.Anchor = (AnchorStyles)(AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right);
             this.progressBar.Location = new Point(12, 25);
             this.progressBar.Name = "progressBar";
             this.progressBar.Size = new Size(421, 23);
@@ -172,7 +202,7 @@ public class ProgressDialog
             // 
             // bCancel
             // 
-            this.bCancel.Anchor = ((AnchorStyles)((AnchorStyles.Bottom | AnchorStyles.Right)));
+            this.bCancel.Anchor = (AnchorStyles)(AnchorStyles.Bottom | AnchorStyles.Right);
             this.bCancel.Location = new Point(358, 54);
             this.bCancel.Name = "bCancel";
             this.bCancel.Size = new Size(75, 23);
