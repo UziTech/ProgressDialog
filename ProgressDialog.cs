@@ -14,7 +14,7 @@ public class ProgressDialog : IDisposable
     private BackgroundWorker worker = new BackgroundWorker();
     private dialogForm dialog = new dialogForm();
 
-    public event CancelEventHandler Canceled;
+    public event CancelEventHandler Cancelled;
     public event RunWorkerCompletedEventHandler Completed;
     public event ProgressChangedEventHandler ProgressChanged;
     public event DoWorkEventHandler DoWork;
@@ -58,15 +58,15 @@ public class ProgressDialog : IDisposable
         worker.DoWork += worker_DoWork;
         worker.WorkerSupportsCancellation = true;
         worker.WorkerReportsProgress = true;
-        dialog.Canceled += dialog_Canceled;
+        dialog.Cancelled += dialog_Cancelled;
     }
 
-    void dialog_Canceled(object sender, CancelEventArgs e)
+    void dialog_Cancelled(object sender, CancelEventArgs e)
     {
         worker.CancelAsync();
-        if (Canceled != null)
+        if (Cancelled != null)
         {
-            Canceled(this, e);
+            Cancelled(this, e);
         }
     }
 
@@ -75,7 +75,7 @@ public class ProgressDialog : IDisposable
         if (DoWork != null)
         {
             DoWork(this, e);
-            e.Cancel = Cancelled || e.Cancel;
+            e.Cancel = IsCancelled || e.Cancel;
         }
         else
         {
@@ -158,7 +158,7 @@ public class ProgressDialog : IDisposable
         }
     }
 
-    public bool Cancelled
+    public bool IsCancelled
     {
         get { return worker.CancellationPending; }
     }
@@ -179,7 +179,7 @@ public class ProgressDialog : IDisposable
         public Label message;
         public ProgressBar progressBar;
         private Button bCancel;
-        public event CancelEventHandler Canceled;
+        public event CancelEventHandler Cancelled;
 
         public dialogForm()
         {
@@ -244,10 +244,10 @@ public class ProgressDialog : IDisposable
             if (MessageBox.Show("Are you sure you want to cancel?", "Cancel", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
             {
                 bCancel.Enabled = false;
-                this.Text = "Canceling...";
-                if (Canceled != null)
+                this.Text = "Cancelling...";
+                if (Cancelled != null)
                 {
-                    Canceled(this, new CancelEventArgs(true));
+                    Cancelled(this, new CancelEventArgs(true));
                 }
             }
         }
