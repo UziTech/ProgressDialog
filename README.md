@@ -8,7 +8,7 @@ Usage
 ```c#
 ProgressDialog pDialog = new ProgressDialog();
 pDialog.Title = "Progress Title";
-pDialog.DoWork += delegate(object dialog, DoWorkEventArgs e)
+pDialog.DoWork += delegate(object dialog, DoWorkEventArgs dwe)
 {
   for (int i = 0; i < (int)dwe.Argument; i++)
   {
@@ -16,7 +16,7 @@ pDialog.DoWork += delegate(object dialog, DoWorkEventArgs e)
     Thread.Sleep(100);
   }
 };
-pDialog.ProgressChanged += delegate(object dialog, ProgressChangedEventArgs e) {
+pDialog.ProgressChanged += delegate(object dialog, ProgressChangedEventArgs pce) {
     pDialog.Message = pce.ProgressPercentage + "/100";
     pDialog.Progress = pce.ProgressPercentage % 100;
 };
